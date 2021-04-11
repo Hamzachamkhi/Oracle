@@ -1,97 +1,68 @@
-# Administration des Bases de données avec Oracle 
+# TP2  Compte rendu Chamkhi Hamza L2CS01 .
 
-Ce quide a pour objectif de vous illustrer les étapes à suivre 
-pour bien installer Oracle 11g.
+### Demo Interblocages :
 
-Vous trouverez dans ce [lien](https://drive.google.com/file/d/11LkeSwxDTBx0Dhn9nQreCL-WC5d36yHR/view) le fichier à télécharger.
+| Timing | Session N° 1 (User1)   | Session N° 2 (User2) |Résultat |
 
-## Installation d'Oracle
-
-Une fois le fichier téléchargé, décompressez le et double cliquez sur "setup" : 
-
-<p align="center">
-  <img width="700" src="images/1.PNG" alt="picture">
-</p>
-
-Ensuite, cliquez sur "Next" :
-
-<p align="center">
-  <img width="700" src="images/2.PNG" alt="picture">
-</p>
-
-Puis, acceptez le contrat de licence :
-
-<p align="center">
-  <img width="700" src="images/3.PNG" alt="picture">
-</p>
-
-Par la suite, saisissez le mot de passe de la base de données **(essayez de vous en souvenir !! )** :
-
-<p align="center">
-  <img width="700" src="images/4.PNG" alt="picture">
-</p>
-
-Et enfin, cliquez sur "installer" pour démarrer l'installation :
-
-<p align="center">
-  <img width="700" src="images/5.PNG" alt="picture">
-</p>
-
-Une fois l'installation terminée, vous trouverez le raccourci sur votre bureau : 
-
-<p align="center">
-  <img width="300" src="images/6.PNG" alt="picture">
-</p>
-
-## Exécution d'Oracle
-
-Lorsque vous double cliquez sur l'icône d'Oracle, vous serez redirigé vers une page web :
-
-<p align="center">
-  <img width="900" src="images/7.PNG" alt="picture">
-</p>
-
-Par la suite, cliquez sur **"Application Express"**, vous serez amené à vous authentifier.
-Saisissez le login **"system"** et le mot de passe celui que vous avez saisi auparavant : 
-
-<p align="center">
-  <img width="900" src="images/8.PNG" alt="picture">
-</p>
-
-Puis, vous pouvez créer votre base de données comme illustré sur l'image qui suit :
-
-<p align="center">
-  <img width="900" src="images/9.PNG" alt="picture">
-</p>
-
-Une fois terminée, cliquez sur "create workspace" vous serez redirigé à la page principale 
-et cliquez sur le lien présent dans la notification :
-
-<p align="center">
-  <img width="900" src="images/10.PNG" alt="picture">
-</p>
-
-Vous serez amené à saisir les coordonnées saisies auparavant : 
-
-<p align="center">
-  <img width="900" src="images/11.PNG" alt="picture">
-</p>
-
-Une fois authentifié, vous serez redirigé vers la page principale de votre workspace : 
-
-<p align="center">
-  <img width="900" src="images/12.PNG" alt="picture">
-</p>
-
-Puis cliquez sur **"SQL workshop"**, pour passer vers l'invite de commande d'Oracle : 
-
-<p align="center">
-  <img width="900" src="images/13.PNG" alt="picture">
-</p>
-
-Bravo !!
+| :----: | :----: |:----:|:----:|
+| t0 | ``` SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');``` |||
+| t1 | ``` UPDATE EMP SET SAL = 4000 WHERE ENAME ='Hichem'; ``` |------|Le salaire a été modifié|
+| t2 | ------ |```UPDATE EMP SET SAL = SAL + 1000 WHERE ENAME ='Mohamed';```|Le salaire a été modifié|
+| t3 | ```UPDATE EMP SET SAL = SAL + 1000 WHERE ENAME ='Mohamed';```|------|Pas de résultat|
+| t4 | ------ |```UPDATE EMP SET SAL = SAL + 1000 WHERE ENAME ='Hichem';```|La session 1 va detecter l'interblocage |
+| t5 | ```Commit;``` |------| Session 2: --> 1 row updated.|
+| t6  |```UPDATE EMP SET SAL = SAL + 1000 WHERE ENAME ='Mohamed';```| ------|Pas de résultat|
+| t7 |  ------ |```Commit;```| Session 1: --> 1 row updated|
+| t8 | ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
 
 
-Maintenant, Vous pouvez saisir vos propres scripts SQL pour interagir avec votre base de données.
+### Demo Niveau d'isolation READ COMMITTED :
+
+| Timing | Session N° 1  | Session N° 2 |Résultat |
+
+| :----: | :----: |:----:|:----:|
+
+| t0| ``` SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');``` |||
+| t1 | ``` UPDATE EMP SET SAL = 4000 WHERE ENAME ='Hichem'; ``` |------|Le salaire a été modifié|
+| t2 | ------ |```SET TRANSACTION ISOLATION LEVEL READ COMMITTED;```|une requête accède à l’état de la base de données au moment où la requête est exécutée|
+| t3 | ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');```|------|
+| t4 | ------ |```UPDATE EMP SET SAL = 3800 WHERE ENAME ='Mohamed';```|Le salaire a été modifié|
+| t5 | ```Insert into EMP (EMPNO,ENAME,JOB,MGR,HIREDATE,COMM,DEPTNO) values ('9999','Maaoui','Magician',null,to_date('17/02/2021','DD/MM/RR'),null,'10');``` |------|Insertion effectue|
+| t6 | ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+| t7 | ------ |```UPDATE EMP SET SAL = 5000 WHERE ENAME ='Hichem';```|Pas de résultat|
+| t8 | ```Commit;``` |------|Le salaire du Hichem a été modifié|
+| t9 | ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+| t10| ------ |```COMMIT;```|Changement du salaire après commit|
+| t11| ```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|------|
+
+### Demo Niveau d'isolation SERIALIZABLE :
+
+| Timing | Session N° 1  | Session N° 2 |Résultat | 
+| :----: | :----: |:----:|:----:|
+| t0| ``` SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');``` |||
+| t1| ``` UPDATE EMP SET SAL = 4000 WHERE ENAME ='Hichem'; ``` |------|Le salaire a été modifié|
+| t2| ------ |```SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;```|une isolation totale|
+| t3| ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');```|------|
+| t4| ------ |```UPDATE EMP SET SAL = 3800 WHERE ENAME ='Mohamed';```|Le salaire a été modifié|
+| t5| ```Insert into EMP (EMPNO,ENAME,JOB,MGR,HIREDATE,COMM,DEPTNO) values ('9999','Maaoui','Magician',null,to_date('17/02/2021','DD/MM/RR'),null,'10');``` |------|Insertion effectue|
+| t6| ```COMMIT;```|------ |Commit est effectué avec succès|
+| t7|```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```| ------ |------|
+| t8| ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+| t9| ```Commit;``` |------|Commit est effectué avec succès|
+| t10|```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```| ------ |------|
+| t11| ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+| t12| ------ | ```COMMIT;```|Commit est effectué avec succès|
+| t13| ``` UPDATE EMP SET SAL = 5000 WHERE ENAME ='Maaoui'; ``` |------|Le salaire a été modifié|
+| t14| ------ |```SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;```|Une isolation totale|
+| t15| ------ |```UPDATE EMP SET SAL = 5200 WHERE ENAME ='Maaoui';```|Pas de résultat car il y’a un verrouillage dans la session 1 sur la ligne  ENAME ='Maaoui'|
+| t16| ```COMMIT;``` |------|La ligne  ENAME ='Maaoui' n’est plus encore verrouillée|
+| t17| ------ |```ROLLBACK;```|retourner au dernier commit pour qu’on puisse faire une nouvelle isolation avec les dernier MAJ du Maaoui(ligne maaoui n’est plus encore verrouillé)|
+| t18| ------ |```SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;```|une isolation totale|
+| t19| ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+| t20| ``` UPDATE EMP SET SAL = 5200 WHERE ENAME ='Maaoui'; ``` |------|Le salaire a été modifié|
+| t21| ```COMMIT;``` |------|Commit est effectué avec succès|
+| t22| ------ | ```COMMIT;```|Commit est effectué avec succès|
+| t23| ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+
 
 
