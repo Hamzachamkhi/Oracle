@@ -2,8 +2,7 @@
 
 ### Demo Interblocages :
 
-| Timing | Session N° 1 (User1)   | Session N° 2 (User2) |Résultat |
-
+| Timing | Session N° 1 (User1)   | Session N° 2 (User2) |Résultat | 
 | :----: | :----: |:----:|:----:|
 | t0 | ``` SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');``` |||
 | t1 | ``` UPDATE EMP SET SAL = 4000 WHERE ENAME ='Hichem'; ``` |------|Le salaire a été modifié|
@@ -14,6 +13,7 @@
 | t6  |```UPDATE EMP SET SAL = SAL + 1000 WHERE ENAME ='Mohamed';```| ------|Pas de résultat|
 | t7 |  ------ |```Commit;```| Session 1: --> 1 row updated|
 | t8 | ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
+
 
 
 ### Demo Niveau d'isolation READ COMMITTED :
