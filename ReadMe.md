@@ -16,12 +16,10 @@
 
 
 
-### Demo Niveau d'isolation READ COMMITTED :
+### Demo Niveau d'isolation  READ COMMITTED :
 
-| Timing | Session N° 1  | Session N° 2 |Résultat |
-
+| Timing | Session N° 1  | Session N° 2 |Résultat | 
 | :----: | :----: |:----:|:----:|
-
 | t0| ``` SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem');``` |||
 | t1 | ``` UPDATE EMP SET SAL = 4000 WHERE ENAME ='Hichem'; ``` |------|Le salaire a été modifié|
 | t2 | ------ |```SET TRANSACTION ISOLATION LEVEL READ COMMITTED;```|une requête accède à l’état de la base de données au moment où la requête est exécutée|
@@ -34,6 +32,7 @@
 | t9 | ------ |```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|
 | t10| ------ |```COMMIT;```|Changement du salaire après commit|
 | t11| ```SELECT ENAME, SAL FROM EMP WHERE ENAME IN ('Mohamed','Hichem', 'Maaoui');```|------|------|
+
 
 ### Demo Niveau d'isolation SERIALIZABLE :
 
